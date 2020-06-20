@@ -3,23 +3,59 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 
-class Square extends React.Component {
-  render() {
-    return (
-      <button className="square">
-        {/* TODO */}
-      </button>
-    );
-  }
+const Square = props => {
+  const {onClick, value, disable} = props
+  return <button className="square" onClick={onClick} disabled={disable}>
+      {value}
+    </button>
 }
 
 class Board extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      squares: Array(9).fill(null),
+      turn: 'X',
+      winner: null
+    }
+  }
+
+  checkWinner = (squares) => {
+    let winner = null
+    const cases = [ [0,1,2] , [3,4,5] , [6,7,8] , [0,3,6] , [1,4,7] , [2,5,8] , [0,4,8] , [2,4,6] ]
+    cases.forEach(d => {
+      const [a, b, c] = d
+      if (squares[a] === squares[b] && squares[b] === squares[c]) {
+        winner = squares[a]
+      }
+    })
+    return winner
+  }
+
+  handleClick = (i) => {
+    const {squares, xIsNext, turn} = this.state
+    const Squares = squares.slice()
+    Squares[i] = turn
+
+    this.setState({
+      squares: Squares, 
+      turn: {'X':'O', 'O':'X'}[turn],
+      winner: this.checkWinner(Squares)
+    })
+  }
+
   renderSquare(i) {
-    return <Square />;
+    const { squares, winner } = this.state
+    return <Square 
+      value={squares[i]}
+      onClick={() => this.handleClick(i)}
+      disable={winner ? true : false}
+    />;
   }
 
   render() {
-    const status = 'Next player: X';
+    const { turn, winner } = this.state
+    const status = winner ? `Winner is ${winner}` : `Next player: ${turn}`
 
     return (
       <div>
